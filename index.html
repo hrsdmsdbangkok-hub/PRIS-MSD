@@ -53,7 +53,7 @@
     </div>
 
     <header class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-blue-800 text-white shadow-xl sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-3.5 sm:px-4 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div class="max-w-7xl mx-auto px-3.5 sm:px-4 py-3.5 sm:py-4 flex flex-row justify-between items-center">
             <div class="flex items-center gap-2.5 sm:gap-3">
                 <div class="bg-white/15 p-2 sm:p-2.5 rounded-xl backdrop-blur-md border border-white/20 shadow-inner flex-shrink-0">
                     <i class="fa-solid fa-chart-pie text-lg sm:text-2xl text-indigo-200"></i>
@@ -62,15 +62,6 @@
                     <h1 class="text-sm sm:text-base md:text-xl font-bold tracking-wide">ระบบวิเคราะห์ข้อมูลการเกษียณอายุราชการ</h1>
                     <p class="text-indigo-200 text-[11px] sm:text-xs">สำนักการแพทย์ กรุงเทพมหานคร (ปีงบประมาณ <span id="title-year-range"></span>)</p>
                 </div>
-            </div>
-            <div class="w-full sm:w-auto grid grid-cols-2 sm:flex items-center gap-2">
-                <button onclick="openGoogleSheetsPrompt()" class="cursor-pointer bg-white/10 hover:bg-white/20 border border-white/30 transition-all duration-200 px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 sm:gap-2 backdrop-blur-sm shadow-sm hover:shadow text-center">
-                    <i class="fa-solid fa-link text-cyan-400"></i> <span class="truncate">Google Sheets</span>
-                </button>
-                <input type="file" id="excel-upload" class="hidden" accept=".xlsx, .xls, .csv">
-                <label for="excel-upload" class="cursor-pointer bg-white/10 hover:bg-white/20 border border-white/30 transition-all duration-200 px-2.5 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 sm:gap-2 backdrop-blur-sm shadow-sm hover:shadow text-center">
-                    <i class="fa-solid fa-file-excel text-emerald-400"></i> <span class="truncate">อัปโหลดไฟล์ Excel</span>
-                </label>
             </div>
         </div>
     </header>
@@ -367,59 +358,6 @@
             dropdown.classList.toggle("show");
         }
 
-        async function openGoogleSheetsPrompt() {
-            const { value: csvUrl } = await Swal.fire({
-                title: 'เชื่อมต่อ Google Sheets (CSV)',
-                input: 'url',
-                inputLabel: 'วางลิงก์ CSV จาก Google Sheets ที่นี่',
-                inputPlaceholder: 'https://docs.google.com/spreadsheets/d/.../export?format=csv',
-                showCancelButton: true,
-                confirmButtonText: 'เชื่อมต่อและซิงค์',
-                cancelButtonText: 'ยกเลิก',
-                confirmButtonColor: '#4f46e5'
-            });
-
-            if (csvUrl) {
-                fetchCSVData(csvUrl);
-            }
-        }
-
-        async function fetchCSVData(url) {
-            Swal.fire({
-                title: 'กำลังดึงข้อมูล...',
-                text: 'กำลังเชื่อมต่อกับ Google Sheets',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const text = await response.text();
-                const workbook = XLSX.read(text, { type: 'string' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { raw: false, dateNF: 'dd/mm/yyyy' });
-                processExcelData(jsonData, false);
-            } catch (error) {
-                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลจากลิงก์ได้ กรุณาตรวจสอบว่าตั้งค่า "เผยแพร่ทางเว็บเป็น CSV" ถูกต้องหรือไม่', 'error');
-            }
-        }
-
-        document.getElementById('excel-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { raw: false, dateNF: 'dd/mm/yyyy' });
-                processExcelData(jsonData, false);
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
         // ฟังก์ชันโหลดไฟล์ Excel อัตโนมัติสำหรับ GitHub Pages หรือเว็บเซิร์ฟเวอร์
         async function loadDefaultExcel() {
             try {
@@ -432,7 +370,7 @@
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, { raw: false, dateNF: 'dd/mm/yyyy' });
                 processExcelData(jsonData, true);
             } catch (err) {
-                console.log("ไม่มีไฟล์ data.xlsx หรือกำลังรอการอัปโหลดไฟล์:", err);
+                console.log("ไม่มีไฟล์ data.xlsx หรือกำลังรอข้อมูล:", err);
             }
         }
 
